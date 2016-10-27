@@ -1,8 +1,8 @@
 <?php
 abstract class entity{
 
-    private $health, $strength, $defence, $luck;
-    public $speed;
+    private $health, $strength, $defence, $luck, $speed;
+    public $name;
 
     /*
      * Abstract functions
@@ -15,8 +15,9 @@ abstract class entity{
      * Public functions
      */
 
-    public function __construct($health, $strength, $defence, $luck, $speed){
+    public function __construct($name, $health, $strength, $defence, $luck, $speed){
 
+        $this->name=$name;
         $this->health=$health;
         $this->strength=$strength;
         $this->defence=$defence;
@@ -28,21 +29,23 @@ abstract class entity{
 
     public function hit($defender){
         $damage = $this->strength - $defender->defence;
-        echo "Attacking with ".$damage." damage.\n";
+        echo $this->name." attacking with ".$damage." damage.\n";
         $defender->defend($damage);
     }
 
     public function inflictDamage($damage){
         if($this->rollDice($this->luck)){
-            echo "Dodged.\n";
+            echo $this->name." dodged.\n";
         }
         else {
             $this->health -= $damage;
         }
 
         if($this->isAlive())
-            echo $this->health." health remaining.\n";
-        else echo "The target is dead.\n";
+            echo $this->name." has ".$this->health." health remaining.\n";
+        else {
+            echo $this->name." is dead.\n";
+        }
     }
 
     public function isAlive(){
@@ -61,21 +64,28 @@ abstract class entity{
         $value=rand(0,100);
         return $value<=$probability;
     }
+
+    public function getSpeed(){
+        return $this->speed;
+    }
+    public function getLuck(){
+        return $this->luck;
+    }
 }
 
 class hero extends entity {
     public function attack($defender){
         $this->hit($defender);
         if($this->rollDice(rapidStrikeProbability) && $defender->isAlive()) {
-            echo "Rapid strike!\n";
+            echo $this->name." uses rapid strike!\n";
             $this->hit($defender);
         }
 
     }
     public function defend($damage){
         if($this->rollDice(magicShieldProbability)){
-            echo "Magic shield!\n";
             $damage/=2;
+            echo $this->name." uses magic shield and decreases damage to ".$damage." !\n";
         }
         $this->inflictDamage($damage);
     }
